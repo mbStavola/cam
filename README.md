@@ -32,3 +32,8 @@ For dev testing:
 For production testing:
  - `docker-compse build`
  - `docker-compose up -d`
+
+## Configuration
+All config options for this project can be found in config.js.
+
+The only thing you really need to touch is the host portion of `SOCKJS_URL` and `SOCKJS_SCRIPT_URL`.
