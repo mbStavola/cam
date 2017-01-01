@@ -1,0 +1,15 @@
+version: '2'
+
+services:
+  cam-web:
+    build: .
+    ports:
+      - "8000:8000"
+    links:
+      - cam-redis
+    container_name: cam-running
+  cam-redis:
+    image: "redis:3.0"
+    ports:
+      - "6379:6379"
+    container_name: cam-redis

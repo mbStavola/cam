@@ -8,7 +8,10 @@ var assets = require('./assets'),
     util = require('util');
 
 function redisClient() {
-    return require('redis').createClient(config.REDIS_PORT);
+    return require('redis').createClient({
+        host: 'cam-redis',
+        port: config.REDIS_PORT
+    });
 }
 
 var SHARED_REDIS = redisClient();
