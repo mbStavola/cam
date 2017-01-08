@@ -3,6 +3,8 @@ An online [Cards Against Humanity](http://cardsagainsthumanity.com/) clone with 
 
 This fork is meant to provide a containerized version of the original project, so setup can be as easy as forking and deploying to Bitnami, Digital Ocean, Heroku, et cetera.
 
+It's an example, so no guarantees are provided!
+
 ## Quickstart
  - Install docker
     - `brew update`
