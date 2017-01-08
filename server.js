@@ -32,7 +32,7 @@ function startServer() {
     sockJs.on('connection', onConnection);
     sockJs.installHandlers(http, {
         sockjs_url: config.SOCKJS_SCRIPT_URL,
-        prefix: config.SOCKJS_PREFIX,
+        prefix: config.SOCKJS_URL,
         jsessionid: false,
         log: sockJsLog,
     });
