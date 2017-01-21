@@ -529,7 +529,34 @@ G.setupElectionTimer = function () {
     var self = this;
     this.electionTimer = setTimeout(function () {
         self.electionTimer = 0;
-        self.electRandom(false);
+
+        self.sendAll('set', {status: 'There was no winner. Swapping cards!', action: null});
+
+        self.victoryAwarded();
+
+        self.players.forEach(function (sub) {
+            if (!sub.player) {
+                return;
+            }
+
+            // Get the redis keys for the discard pile and this player's hand
+            var discards = this.key + ':whiteDiscards';
+            var hand = sub.player.key + ":hand";
+
+            // Fetch the members of the discard pile
+            self.r.smembers(discards, function (err, cards) {
+                if (err) {
+                    return cb(err);
+                }
+
+                // Move a random card from the discard pile to this player's hand
+                var i = Math.floor(Math.random() * cards.length);
+                self.r.smove(discards, hand, cards[i]);
+            });
+        });
+
+        self.nextDealer();
+        self.nextNominations();
     }, delay);
 };
 
