@@ -9,6 +9,6 @@ services:
     container_name: cam-running
   cam-redis:
     image: "redis:3.0"
-    ports:
-      - "6379:6379"
+    expose:
+      - "6379"
     container_name: cam-redis
