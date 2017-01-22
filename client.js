@@ -623,7 +623,7 @@ function blinkTitle() {
 
 function suggestionBox() {
 	var $link = $('<a>', {
-		href: 'https://github.com/lalcmellkmal/cam/tree/master/sets',
+		href: 'https://github.com/mbStavola/cam/tree/impl/cards-against-friends/sets',
 		rel: 'nofollow',
 		target: '_blank',
 		text: 'Suggestions',

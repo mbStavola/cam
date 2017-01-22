@@ -3,7 +3,7 @@ services:
   cam-web:
     build: .
     ports:
-      - "8000:8000"
+      - "80:8000"
     links:
       - cam-redis
     container_name: cam-running
