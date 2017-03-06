@@ -1,8 +1,8 @@
 var assets = require('./assets'),
     common = require('./common'),
     config = require('./config'),
-    connect = require('connect'),
     game = require('./game'),
+    escape = require('escape-html'),
     events = require('events'),
     urlParse = require('url').parse,
     util = require('util');
@@ -18,10 +18,10 @@ var SHARED_REDIS = redisClient();
 game.setRedis(SHARED_REDIS);
 
 function startServer() {                                                       
-    var app = connect.createServer();
+    var app = require('connect')();
     app.use(serveScripts);
     app.use(serveSuggestions);
-    app.use(connect.static(__dirname + '/www', {maxAge: 2592000000}));
+    app.use(require('serve-static')(__dirname + '/www', {maxAge: 2592000000}));
     app.on('upgrade', function (req, resp) {
         resp.end();
     });
@@ -36,8 +36,12 @@ function startServer() {
         jsessionid: false,
         log: sockJsLog,
     });
-    http.listen(config.LISTEN_PORT);
-    console.log('Listening on port ' + config.LISTEN_PORT + '.');
+    var port = config.LISTEN_PORT;
+    http.listen(port, function (err) {
+        if (err) throw err;
+        if (typeof port == 'string') require('fs').chmodSync(port, '775');
+        console.log('Listening on ' + port + '.');
+    });
 }
 
 function onConnection(conn) {
@@ -144,42 +148,54 @@ C.flush = function () {
 C.handle_login = function (msg) {
     if (this.state != 'new' || !(typeof msg.id == 'string'))
         return this.warn("Can't login.");
-    var fakeId = msg.id;
-    if (!/^\d{1,20}$/.test(fakeId))
+    var cookieId = msg.id;
+    if (!/^\d{1,20}$/.test(cookieId))
         return this.warn("Bad id.");
+    var fakeKey = 'cam:id:' + cookieId;
     var self = this;
     // Get them a user ID first
-    this.r.hget('cam:userIds', fakeId, function (err, realId) {
+    var m = this.r.multi();
+    m.get(fakeKey);
+    m.expire(fakeKey, config.NAME_EXPIRY); // reset TTL for this name
+    m.exec(function (err, results) {
         if (err)
             return self.drop(err);
+        var realId = results[0];
         if (realId) {
-            self.loadUser(realId);
+            self.loadUser(realId, cookieId);
             return;
         }
         self.r.incr('cam:userCtr', function (err, realId) {
             if (err)
                 return self.drop(err);
-            self.r.hsetnx('cam:userIds', fakeId, realId, function (err, wasSet) {
+            self.r.setex(fakeKey, config.NAME_EXPIRY, realId, function (err) {
                 if (err)
                     return self.drop(err);
-                else if (!wasSet)
-                    return self.drop("Couldn't save your account.");
-                self.loadUser(realId);
+                self.loadUser(realId, cookieId);
             });
         });
     });
 };
 
-C.loadUser = function (id) {
+C.loadUser = function (id, cookieId) {
     if (this.state != 'new')
         return this.warn("User already loaded!");
 
     this.id = id;
     this.key = 'cam:user:' + id;
     var self = this;
-    this.r.hget(this.key, 'name', function (err, name) {
+    var m = this.r.multi();
+    m.hget(this.key, 'name');
+    m.hset(this.key, 'c', cookieId);
+    m.expire(this.key, config.NAME_EXPIRY); // reset TTL
+    m.exec(function (err, results) {
         if (err)
             return self.drop(err);
+        var name = results[0];
+        if (name) {
+            var nameKey = 'cam:name:' + name.toLowerCase();
+            self.r.expire(nameKey, config.NAME_EXPIRY, function () {});
+        }
         self.name = name || null;
         self.send('set', {t: 'account', name: name});
         game.Player.load(self.id, function (err, player) {
@@ -243,15 +259,19 @@ C.handle_setName = function (msg) {
     if (name == oldName)
         return;
     var self = this;
-    this.r.hsetnx('cam:userNames', name.toLowerCase(), this.id, function (err, success) {
+    var newKey = 'cam:name:' + name.toLowerCase();
+    this.r.setnx(newKey, this.id, function (err, success) {
         if (err)
             return self.drop(err);
         if (!success)
             return self.warn("Name is already taken.");
         var m = self.r.multi();
+        m.expire(newKey, config.NAME_EXPIRY);
         if (oldName)
-            m.hdel('cam:userNames', oldName.toLowerCase());
-        m.hset(self.key, 'name', name).exec(function (err) {
+            m.del('cam:name:' + oldName.toLowerCase());
+        m.hset(self.key, 'name', name);
+        m.expire(self.key, config.NAME_EXPIRY);
+        m.exec(function (err) {
             if (err) {
                 self.warn("Lost username " + name + "!");
                 return self.drop(err);
@@ -298,7 +318,7 @@ function serveSuggestions(req, resp, next) {
             if (err)
                 return console.error(err);
             for (var i = 0; i < suggestions.length; i ++) {
-                var card = connect.utils.escape(suggestions[i]);
+                var card = escape(suggestions[i]);
                 resp.write(card + '<br>\n');
             }
             resp.end();
