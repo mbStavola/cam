@@ -60,7 +60,7 @@ Mechazawa.
 # DARKER THAN BLACK
 Chinese Electric Batman.
 # DEATH NOTE
-rKilling people by writing their names down.
+Killing people by writing their names down.
 Kira.
 L desu.
 # DRRR
@@ -70,7 +70,7 @@ DOLLARS.
 Cinematic timing.
 # EVA
 Comatose girls.
-aOmedetou.
+Omedetou.
 Everything turning into Tang®.
 Gendo interlacing his fingers.
 Getting in the fucking robot.
@@ -80,7 +80,7 @@ LCL in your lungs.
 NERV.
 Kaworu.
 My AT field.
-sPen-pen.
+Pen-pen.
 Playing his piano.
 Plugsuits.
 A Progressive Knife.
@@ -90,7 +90,7 @@ Shinji.
 The Third Impact.
 Tumbling down, tumbling down, tumbling down.
 Unit-01.
-e# FIST OF THE NORTH STAR
+# FIST OF THE NORTH STAR
 Fist of the North Star.
 You wa shock.
 Being already dead.
@@ -98,9 +98,8 @@ Being already dead.
 Swinging the bat.
 Those eyebrows.
 Yellow vespas.
-# FULL METAL ALCHEMIST
-Alchemy.
-aFull Metal Alchemist.
+# FULL METAL ALCHEMISTAlchemy.
+Full Metal Alchemist.
 Equivalent Exchange.
 # FSN
 J-J-Jamming it in.
@@ -110,7 +109,7 @@ Sakura eating a fish.
 Servants.
 # GATCHAMAN
 Crowds.
-CGALAX.
+GALAX.
 Gatchaman.
 Hajime.
 Katze.
