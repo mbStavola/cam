@@ -2,25 +2,20 @@ var _ = require('underscore'),
     async = require('async'),
     common = require('./common'),
     config = require('./config'),
+    gameConfig = require('./game-config'),
     fs = require('fs'),
     Model = require('./model').Model,
     StateMachine = require('./state-machine').StateMachine,
     util = require('util');
 
-var HAND_SIZE = 8;
-var MIN_PLAYERS = 3;
-var MAX_PLAYERS = 20;
-var ROUND_POINTS = 5;
-var MESSAGE_RATE = 7;
-var DEALER_TERM = "judge";
+var HAND_SIZE = gameConfig.HAND_SIZE;
+var MIN_PLAYERS = gameConfig.MIN_PLAYERS;
+var MAX_PLAYERS = gameConfig.MAX_PLAYERS;
+var ROUND_POINTS = gameConfig.ROUND_POINTS;
+var MESSAGE_RATE = gameConfig.MESSAGE_RATE;
+var DEALER_TERM = gameConfig.DEALER_TERM;
 
-var TIMEOUTS = {
-    nomination: 25,
-    election: 40,
-    intermission: 20,
-    abandoned: 30, // clientless
-    afk: 10*60, // no actions
-};
+var TIMEOUTS = gameConfig.TIMEOUTS;
 
 var GAMES = {};
 var PLAYERS = {};
@@ -107,7 +102,8 @@ G.addPlayer = function (player) {
         this.warn('Already playing.');
         return false;
     }
-    if (player.ip != '127.0.0.1' && this.players.some(function (p) { return p.ip == player.ip; })) {
+    if (['127.0.0.1', '::1'].indexOf(player.ip) < 0 &&
+                this.players.some(function (p) { return p.ip == player.ip; })) {
         this.warn('Already playing.');
         return false;
     }
